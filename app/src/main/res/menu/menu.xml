@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/btn_add_tag"
+        android:title="@string/add_tag"
+        app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/btn_rm_tag"
+        android:title="@string/rm_tag"
+        app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/btn_edit_tag"
+        android:title="@string/edit_tag"
+        app:showAsAction="collapseActionView" />
+</menu>

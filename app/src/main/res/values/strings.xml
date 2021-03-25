@@ -2,4 +2,9 @@
     <string name="app_name">Noter</string>
     <string name="search_title">Search</string>
     <string name="search_hint">Enter tag or note name to search ...</string>
+    <string name="title_hint">Your title here</string>
+    <string name="content_hint">Your note here</string>
+    <string name="add_tag">New tag</string>
+    <string name="rm_tag">Remove tag</string>
+    <string name="edit_tag">Edit tag</string>
 </resources>
