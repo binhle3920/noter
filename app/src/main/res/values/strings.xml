@@ -7,4 +7,8 @@
     <string name="add_tag">New tag</string>
     <string name="rm_tag">Remove tag</string>
     <string name="edit_tag">Edit tag</string>
+    <string name="add_tag_title">Create a new Tag</string>
+    <string name="add_tag_hint">Enter Tag name</string>
+    <string name="add_tag_color_hint">Choose Tag color</string>
+    <string name="btn_save">Save</string>
 </resources>

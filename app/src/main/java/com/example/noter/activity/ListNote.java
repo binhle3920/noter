@@ -1,24 +1,45 @@
 package com.example.noter.activity;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.RippleDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.example.noter.R;
+import com.example.noter.model.TagModel;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
+import petrov.kristiyan.colorpicker.ColorPicker;
 
 public class ListNote extends AppCompatActivity {
     ImageButton add_note;
+    List<TagModel> listTag;
     SharedPreferences sharedPreferences; //loading and saving notes/tags
     SharedPreferences.Editor editor;
-    Gson gson = new Gson();
+    Gson gson;
+    String current_color = String.valueOf(R.color.black);
+
 
     private static final String PREF_TAG = "com.example.noter.PREFERENCES";
     private static final String TAG = "Tags";
@@ -46,6 +67,10 @@ public class ListNote extends AppCompatActivity {
         //SharedPreferences
         sharedPreferences = getSharedPreferences(PREF_TAG, MODE_PRIVATE);
         editor = sharedPreferences.edit();
+
+        //Get all tags
+        listTag = getTagList();
+        Log.i("LIST", String.valueOf(listTag));
     }
 
     //Create search button
@@ -72,5 +97,101 @@ public class ListNote extends AppCompatActivity {
             }
         });
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.btn_add_tag:
+                createAddTagDialog();
+                return true;
+            case R.id.btn_rm_tag:
+                return true;
+            case R.id.btn_edit_tag:
+                return true;
+        }
+
+        return false;
+    }
+
+    public List<TagModel> getTagList() {
+        List<TagModel> arrayItems = null;
+        String serializedObject = sharedPreferences.getString(TAG, null);
+        if (serializedObject != null) {
+            gson = new Gson();
+            Type type = new TypeToken<List<TagModel>>(){}.getType();
+            arrayItems = gson.fromJson(serializedObject, type);
+        }
+
+        return arrayItems;
+    }
+    public void createAddTagDialog() {
+        AlertDialog.Builder addDialogBuilder;
+        AlertDialog addDialog;
+
+        addDialogBuilder = new AlertDialog.Builder(this);
+        final View addTagView = getLayoutInflater().inflate(R.layout.add_tag_dialog, null);
+
+        addDialogBuilder.setView(addTagView);
+        addDialog = addDialogBuilder.create();
+        addDialog.show();
+
+        EditText tag_name = (EditText) addTagView.findViewById(R.id.tag_name);
+        Button pick_color = (Button) addTagView.findViewById(R.id.btn_tag_color);
+        Button save = (Button) addTagView.findViewById(R.id.btn_save);
+
+
+        pick_color.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ColorPicker colorPicker = new ColorPicker(ListNote.this);
+                colorPicker.show();
+                colorPicker.setOnChooseColorListener(new ColorPicker.OnChooseColorListener() {
+                    @Override
+                    public void onChooseColor(int position,int color) {
+                        pick_color.setBackgroundColor(color);
+                        current_color = String.valueOf(color);
+                    }
+
+                    @Override
+                    public void onCancel(){
+                        // put code
+                    }
+                });
+            }
+        });
+
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String tag_name_string = tag_name.getText().toString();
+
+                //check if tag name is exist
+                if (listTag != null) {
+                    for (TagModel tag : listTag) {
+                        if (tag_name_string.equals(tag.getName())) {
+                            Toast.makeText(ListNote.this, "Tag name existed! Choose another one.", Toast.LENGTH_SHORT).show();
+                            addDialog.cancel();
+                            return;
+                        }
+                    }
+                } else {
+                    listTag = new ArrayList<>();
+                }
+
+                //if not existed, insert a new tag
+                TagModel tag = new TagModel();
+                tag.setTagModel(tag_name_string, current_color, null);
+                listTag.add(tag);
+                gson = new Gson();
+                saveTag(TAG, gson.toJson(listTag));
+                Toast.makeText(ListNote.this, "Tag added", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void saveTag(String key, String value) {
+        editor.putString(key, value);
+        editor.commit();
     }
 }
