@@ -3,9 +3,12 @@ package com.example.noter.activity;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
@@ -18,14 +21,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.example.noter.R;
+import com.example.noter.adapter.TagAdapter;
 import com.example.noter.model.TagModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +41,7 @@ import petrov.kristiyan.colorpicker.ColorPicker;
 public class ListNote extends AppCompatActivity {
     ImageButton add_note;
     List<TagModel> listTag;
+    RecyclerView recyclerViewTag, recyclerViewNote;
     SharedPreferences sharedPreferences; //loading and saving notes/tags
     SharedPreferences.Editor editor;
     Gson gson;
@@ -51,6 +58,11 @@ public class ListNote extends AppCompatActivity {
         setContentView(R.layout.activity_list_note);
 
         setUpResources();
+
+        //set tag adapter
+        TagAdapter tagAdapter = new TagAdapter(this, R.id.list_tag, listTag);
+        recyclerViewTag.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerViewTag.setAdapter(tagAdapter);
     }
 
     private void setUpResources() {
@@ -60,6 +72,7 @@ public class ListNote extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ListNote.this, DetailNote.class);
+                intent.putExtra("ListTag", (Serializable) listTag);
                 startActivity(intent);
             }
         });
@@ -70,7 +83,15 @@ public class ListNote extends AppCompatActivity {
 
         //Get all tags
         listTag = getTagList();
-        Log.i("LIST", String.valueOf(listTag));
+        if (listTag == null) {
+            listTag = new ArrayList<>();
+            TagModel defaultTag = new TagModel();
+            defaultTag.setTagModel("None Tag".toUpperCase(), String.valueOf(Color.parseColor("#222426")), null);
+            listTag.add(defaultTag);
+        }
+
+        //Find recycler view
+        recyclerViewTag = findViewById(R.id.list_tag);
     }
 
     //Create search button
@@ -164,7 +185,7 @@ public class ListNote extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String tag_name_string = tag_name.getText().toString();
+                String tag_name_string = tag_name.getText().toString().toUpperCase();
 
                 //check if tag name is exist
                 if (listTag != null) {
@@ -186,6 +207,11 @@ public class ListNote extends AppCompatActivity {
                 gson = new Gson();
                 saveTag(TAG, gson.toJson(listTag));
                 Toast.makeText(ListNote.this, "Tag added", Toast.LENGTH_SHORT).show();
+                addDialog.cancel();
+
+                //refresh activity
+                finish();
+                startActivity(getIntent());
             }
         });
     }
