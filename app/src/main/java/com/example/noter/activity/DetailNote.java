@@ -36,6 +36,8 @@ public class DetailNote extends AppCompatActivity {
     EditText note_title;
     String tag;
     NoteModel note;
+    Boolean edit = false;
+    NoteModel currentNote;
 
     //Input note framework
     private RichTextEditor note_content;
@@ -59,10 +61,16 @@ public class DetailNote extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //get intent
+
         listTag = (List<TagModel>) getIntent().getSerializableExtra("ListTag");
         listNote = (List<NoteModel>) getIntent().getSerializableExtra("ListNote");
         if (listNote == null) {
             listNote = new ArrayList<>();
+        }
+
+        if (getIntent().getStringExtra("Mode").equals("Edit")) {
+            currentNote = (NoteModel) getIntent().getSerializableExtra("Note");
+            edit = true;
         }
 
         setUpSpinner();
@@ -97,6 +105,20 @@ public class DetailNote extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(PREF_TAG, MODE_PRIVATE);
         editor = sharedPreferences.edit();
         gson = new Gson();
+
+        //set up text if this is edit
+        if (edit == true) {
+            note_day.setText(currentNote.getNoteDate());
+            note_title.setText(currentNote.getNoteTitle());
+            note_content.setHtml(currentNote.getNoteContent());
+            for (int i = 0; i < listTag.size(); i++) {
+                if (listTag.get(i).getName().equals(currentNote.getNoteTag())) {
+                    note_tag.setSelection(i);
+                }
+            }
+            note_tag.setEnabled(false);
+        }
+
     };
 
     @Override

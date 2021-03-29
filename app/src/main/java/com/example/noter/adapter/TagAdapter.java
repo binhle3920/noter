@@ -44,7 +44,7 @@ public class TagAdapter extends RecyclerView.Adapter {
         } else {
             recyclerViewNote.setVisibility(View.VISIBLE);
             emptyLayout.setVisibility(View.GONE);
-            NoteAdapter noteAdapter = new NoteAdapter(context, R.id.list_note, listNoteOfTag, items.get(0));
+            NoteAdapter noteAdapter = new NoteAdapter(context, R.id.list_note, listNoteOfTag, items.get(0), listNote, items);
             recyclerViewNote.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
             recyclerViewNote.setAdapter(noteAdapter);
         }
@@ -68,7 +68,7 @@ public class TagAdapter extends RecyclerView.Adapter {
             } else {
                 recyclerViewNote.setVisibility(View.VISIBLE);
                 emptyLayout.setVisibility(View.GONE);
-                NoteAdapter noteAdapter = new NoteAdapter(context, R.id.list_note, listNoteOfTag, items.get(getLayoutPosition()));
+                NoteAdapter noteAdapter = new NoteAdapter(context, R.id.list_note, listNoteOfTag, items.get(getLayoutPosition()), listNote, items);
                 recyclerViewNote.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
                 recyclerViewNote.setAdapter(noteAdapter);
             }

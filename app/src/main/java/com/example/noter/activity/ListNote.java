@@ -80,6 +80,7 @@ public class ListNote extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ListNote.this, DetailNote.class);
+                intent.putExtra("Mode", "New");
                 intent.putExtra("ListTag", (Serializable) listTag);
                 intent.putExtra("ListNote", (Serializable) listNote);
                 finish();

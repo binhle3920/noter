@@ -1,6 +1,8 @@
 package com.example.noter.adapter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -18,25 +20,31 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.noter.R;
+import com.example.noter.activity.DetailNote;
+import com.example.noter.activity.ListNote;
 import com.example.noter.model.NoteModel;
 import com.example.noter.model.TagModel;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class NoteAdapter extends RecyclerView.Adapter {
-    List<NoteModel> items;
+    List<NoteModel> items, allItems;
+    List<TagModel> allTags;
     TagModel tag;
     Context context;
 
-    public NoteAdapter(@NonNull Context context, int resource, List<NoteModel> items, TagModel tag) {
+    public NoteAdapter(@NonNull Context context, int resource, List<NoteModel> items, TagModel tag, List<NoteModel> allItems, List<TagModel> allTags) {
         this.items = items;
         this.tag = tag;
         this.context = context;
-        Log.i("NOTES", String.valueOf(items));
+        //we need those variable for opening adding activiy
+        this.allItems = allItems;
+        this.allTags = allTags;
     }
 
     //item holder class
-    public class NoteItemHolder extends RecyclerView.ViewHolder {
+    public class NoteItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         private Button btn;
         private TextView date;
 
@@ -44,6 +52,27 @@ public class NoteAdapter extends RecyclerView.Adapter {
             super(view);
             btn = (Button) view.findViewById(R.id.btn_note);
             date = (TextView) view.findViewById(R.id.note_date);
+            btn.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(context, DetailNote.class);
+            intent.putExtra("Mode", "Edit");
+            intent.putExtra("ListTag", (Serializable) allTags);
+            intent.putExtra("ListNote", (Serializable) allItems);
+
+            for (NoteModel note : items) {
+                if (note.getNoteTitle().equals(String.valueOf(btn.getText()))) {
+                    intent.putExtra("Note", (Serializable) note);
+                }
+            }
+            context.startActivity(intent);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            return false;
         }
     }
 
