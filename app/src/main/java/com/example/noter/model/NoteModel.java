@@ -1,12 +1,14 @@
 package com.example.noter.model;
 
-public class NoteModel {
+import java.io.Serializable;
+
+public class NoteModel implements Serializable {
     String note_title;
     String note_content;
     String note_date;
-    TagModel tag;
+    String tag;
 
-    public void NoteModel(String note_title, String note_content, String note_date, TagModel tag) {
+    public void setNoteModel(String note_title, String note_content, String note_date, String tag) {
         this.note_title = note_title;
         this.note_content = note_content;
         this.note_date = note_date;
