@@ -2,6 +2,7 @@ package com.example.noter.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -24,7 +25,10 @@ import com.google.gson.Gson;
 
 import net.dankito.richtexteditor.android.RichTextEditor;
 import net.dankito.richtexteditor.android.toolbar.AllCommandsEditorToolbar;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class DetailNote extends AppCompatActivity {
@@ -63,6 +67,11 @@ public class DetailNote extends AppCompatActivity {
 
         setUpSpinner();
         setUpRecourse();
+
+        //set current date
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
+        note_day.setText(simpleDateFormat.format(calendar.getTime()));
     }
 
     private void setUpRecourse() {
@@ -112,7 +121,7 @@ public class DetailNote extends AppCompatActivity {
         note_tag.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                tag = list_tag.get(0);
+                tag = list_tag.get(position);
             }
 
             @Override
@@ -154,6 +163,8 @@ public class DetailNote extends AppCompatActivity {
                 saveNote(NOTE, gson.toJson(listNote));
                 Toast.makeText(DetailNote.this, "Note saved", Toast.LENGTH_SHORT).show();
                 finish();
+                Intent intent = new Intent(DetailNote.this, ListNote.class);
+                startActivity(intent);
         }
 
         return false;

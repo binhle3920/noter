@@ -63,7 +63,7 @@ public class ListNote extends AppCompatActivity {
         setUpResources();
 
         //set tag adapter
-        TagAdapter tagAdapter = new TagAdapter(this, R.id.list_tag, listTag);
+        TagAdapter tagAdapter = new TagAdapter(this, R.id.list_tag, listTag, listNote);
         recyclerViewTag.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         recyclerViewTag.setAdapter(tagAdapter);
 
@@ -82,6 +82,7 @@ public class ListNote extends AppCompatActivity {
                 Intent intent = new Intent(ListNote.this, DetailNote.class);
                 intent.putExtra("ListTag", (Serializable) listTag);
                 intent.putExtra("ListNote", (Serializable) listNote);
+                finish();
                 startActivity(intent);
             }
         });
@@ -117,9 +118,6 @@ public class ListNote extends AppCompatActivity {
         listNote = getNoteList();
         if (listNote == null) {
             listNote = new ArrayList<>();
-            NoteModel defaultNote = new NoteModel();
-            defaultNote.setNoteModel("This is an example note", "Your content goes here", "01-01-2000", "NONE TAG");
-            listNote.add(defaultNote);
         }
     }
 
