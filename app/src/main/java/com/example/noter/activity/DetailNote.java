@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,10 +31,12 @@ import java.util.Calendar;
 import java.util.List;
 
 public class DetailNote extends AppCompatActivity {
+    //View
     TextView note_day;
     EditText note_title;
     String tag;
-    NoteModel note;
+
+    //Edit note
     Boolean edit = false;
     NoteModel currentNote;
 
@@ -50,6 +51,7 @@ public class DetailNote extends AppCompatActivity {
     private static final String PREF_TAG = "com.example.noter.PREFERENCES";
     private static final String NOTE = "Notes";
 
+    //spinner
     Spinner note_tag;
     List<TagModel> listTag;
     List<NoteModel> listNote;
@@ -61,7 +63,6 @@ public class DetailNote extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //get intent
-
         listTag = (List<TagModel>) getIntent().getSerializableExtra("ListTag");
         listNote = (List<NoteModel>) getIntent().getSerializableExtra("ListNote");
         if (listNote == null) {
@@ -116,7 +117,6 @@ public class DetailNote extends AppCompatActivity {
                     note_tag.setSelection(i);
                 }
             }
-            note_tag.setEnabled(false);
         }
 
     };
@@ -163,7 +163,7 @@ public class DetailNote extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.save, menu);
+        inflater.inflate(R.menu.detail_menu, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -172,20 +172,62 @@ public class DetailNote extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.save:
-                note = new NoteModel();
-
                 //handle error
                 if (TextUtils.isEmpty(note_title.getText())) {
                     note_title.setError("Title is required");
                     return false;
                 }
 
-                note.setNoteModel(String.valueOf(note_title.getText()), note_content.getHtml(), String.valueOf(note_day.getText()), tag);
-                listNote.add(note);
+                if (edit == true) {
+                    //edit a note
+                    int cur_note_pos;
+                    for (cur_note_pos = 0; cur_note_pos < listNote.size(); cur_note_pos++) {
+                        NoteModel tempNote = listNote.get(cur_note_pos);
+                        if (tempNote.getNoteTitle().equals(currentNote.getNoteTitle()))
+                            if (tempNote.getNoteTag().equals(currentNote.getNoteTag()))
+                                if (tempNote.getNoteContent().equals(currentNote.getNoteContent()))
+                                    if (tempNote.getNoteDate().equals(currentNote.getNoteDate()))
+                                        break;
+                    }
+
+                    listNote.get(cur_note_pos)
+                            .setNoteModel(String.valueOf(note_title.getText()), note_content.getHtml(), String.valueOf(note_day.getText()), tag);
+                } else {
+                    //saving new note
+                    NoteModel note = new NoteModel();
+                    note.setNoteModel(String.valueOf(note_title.getText()), note_content.getHtml(), String.valueOf(note_day.getText()), tag);
+                    listNote.add(note);
+                }
+
+                //save list note
                 saveNote(NOTE, gson.toJson(listNote));
                 Toast.makeText(DetailNote.this, "Note saved", Toast.LENGTH_SHORT).show();
-                finish();
+                //back to list note
                 Intent intent = new Intent(DetailNote.this, ListNote.class);
+                finish();
+                startActivity(intent);
+
+            case R.id.del:
+                if (edit == true) {
+                    //edit a note
+                    int cur_note_pos;
+                    for (cur_note_pos = 0; cur_note_pos < listNote.size(); cur_note_pos++) {
+                        NoteModel tempNote = listNote.get(cur_note_pos);
+                        if (tempNote.getNoteTitle().equals(currentNote.getNoteTitle()))
+                            if (tempNote.getNoteTag().equals(currentNote.getNoteTag()))
+                                if (tempNote.getNoteContent().equals(currentNote.getNoteContent()))
+                                    if (tempNote.getNoteDate().equals(currentNote.getNoteDate()))
+                                        break;
+                    }
+                    listNote.remove(cur_note_pos);
+                }
+
+                //save list note
+                saveNote(NOTE, gson.toJson(listNote));
+                Toast.makeText(DetailNote.this, "Note deleted", Toast.LENGTH_SHORT).show();
+                //back to list note
+                intent = new Intent(DetailNote.this, ListNote.class);
+                finish();
                 startActivity(intent);
         }
 

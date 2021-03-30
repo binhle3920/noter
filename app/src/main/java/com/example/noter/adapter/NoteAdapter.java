@@ -88,7 +88,9 @@ public class NoteAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         NoteModel item = items.get(position);
         NoteItemHolder noteItemHolder = (NoteItemHolder) holder;
-
+        //enable long lick
+        noteItemHolder.itemView.setLongClickable(true);
+        //set background and text
         noteItemHolder.btn.setBackgroundColor(tag.getColor());
         noteItemHolder.btn.setText(item.getNoteTitle());
         noteItemHolder.date.setText(item.getNoteDate());
