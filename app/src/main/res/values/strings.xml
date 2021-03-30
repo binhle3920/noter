@@ -11,5 +11,7 @@
     <string name="add_tag_hint">Enter Tag name</string>
     <string name="add_tag_color_hint">Choose Tag color</string>
     <string name="btn_save">Save</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_edit">Edit</string>
     <string name="remove_note">Remove Note</string>
 </resources>

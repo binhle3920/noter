@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -19,11 +20,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.noter.R;
@@ -49,7 +53,9 @@ public class ListNote extends AppCompatActivity {
     SharedPreferences.Editor editor;
     Gson gson;
     String current_color = String.valueOf(R.color.black);
+    String currentDeleteTag;
 
+    LinearLayout emptyLayout;
 
     private static final String PREF_TAG = "com.example.noter.PREFERENCES";
     private static final String TAG = "Tags";
@@ -63,14 +69,19 @@ public class ListNote extends AppCompatActivity {
         setUpResources();
 
         //set tag adapter
-        TagAdapter tagAdapter = new TagAdapter(this, R.id.list_tag, listTag, listNote);
-        recyclerViewTag.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        recyclerViewTag.setAdapter(tagAdapter);
 
-        //set note adapter
-        //NoteAdapter noteAdapter = new NoteAdapter(this, R.id.list_note, listNote);
-        //recyclerViewNote.setLayoutManager(new GridLayoutManager(this, 2));
-        //recyclerViewNote.setAdapter(noteAdapter);
+        if (listTag.isEmpty()) {
+            recyclerViewTag.setVisibility(View.GONE);
+            emptyLayout = (LinearLayout) findViewById(R.id.empty_layout);
+            emptyLayout.setVisibility(View.VISIBLE);
+        } else {
+            recyclerViewTag.setVisibility(View.VISIBLE);
+            emptyLayout = (LinearLayout) findViewById(R.id.empty_layout);
+            emptyLayout.setVisibility(View.GONE);
+            TagAdapter tagAdapter = new TagAdapter(this, R.id.list_tag, listTag, listNote);
+            recyclerViewTag.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            recyclerViewTag.setAdapter(tagAdapter);
+        }
     }
 
     private void setUpResources() {
@@ -155,8 +166,10 @@ public class ListNote extends AppCompatActivity {
                 createAddTagDialog();
                 return true;
             case R.id.btn_rm_tag:
+                createDeleteTagDialog();
                 return true;
             case R.id.btn_edit_tag:
+                createEditTagDialog();
                 return true;
         }
 
@@ -186,6 +199,92 @@ public class ListNote extends AppCompatActivity {
 
         return arrayItems;
     }
+
+    public void createEditTagDialog() {
+        AlertDialog.Builder editDialogBuilder;
+        AlertDialog editDialog;
+
+        editDialogBuilder = new AlertDialog.Builder(this);
+        final View editTagView = getLayoutInflater().inflate(R.layout.edit_tag_dialog, null);
+
+        editDialogBuilder.setView(editTagView);
+        editDialog = editDialogBuilder.create();
+        editDialog.show();
+
+        Spinner note_tag = (Spinner) editTagView.findViewById(R.id.note_tag);
+        EditText tag_name = (EditText) editTagView.findViewById(R.id.tag_name);
+        Button pick_color = (Button) editTagView.findViewById(R.id.btn_tag_color);
+        Button save = (Button) editTagView.findViewById(R.id.btn_edit);
+
+        //set up spinner
+        setUpSpinner(note_tag);
+
+        //set up picking new color
+        pick_color.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ColorPicker colorPicker = new ColorPicker(ListNote.this);
+                colorPicker.show();
+                colorPicker.setOnChooseColorListener(new ColorPicker.OnChooseColorListener() {
+                    @Override
+                    public void onChooseColor(int position,int color) {
+                        pick_color.setBackgroundColor(color);
+                        current_color = String.valueOf(color);
+                    }
+
+                    @Override
+                    public void onCancel(){
+                        // put code
+                    }
+                });
+            }
+        });
+
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String tag_name_string = tag_name.getText().toString().toUpperCase();
+
+                //check if tag name is exist
+                if (listTag != null) {
+                    for (TagModel tag : listTag) {
+                        if (tag_name_string.equals(tag.getName())) {
+                            Toast.makeText(ListNote.this, "Tag name existed! Choose another one.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+                }
+
+                //find tag
+                int pos_to_edit;
+                for (pos_to_edit=0; pos_to_edit<listTag.size(); pos_to_edit++) {
+                    if (listTag.get(pos_to_edit).getName().equals(currentDeleteTag))
+                        break;
+                }
+
+                //edit tag
+                listTag.get(pos_to_edit).setTagModel(tag_name_string, current_color);
+
+                //edit all note tag
+                for (int i=0; i<listNote.size(); i++) {
+                    if (listNote.get(i).getNoteTag().equals(currentDeleteTag))
+                        listNote.get(i).editNoteTag(tag_name_string);
+                }
+
+                //save tag
+                saveTag(TAG, gson.toJson(listTag));
+                saveTag(NOTE, gson.toJson(listNote));
+
+                Toast.makeText(ListNote.this, "Tag edited", Toast.LENGTH_SHORT).show();
+                editDialog.cancel();
+
+                //refresh activity
+                finish();
+                startActivity(getIntent());
+            }
+        });
+    }
+
 
     public void createAddTagDialog() {
         AlertDialog.Builder addDialogBuilder;
@@ -256,6 +355,52 @@ public class ListNote extends AppCompatActivity {
         });
     }
 
+    public void createDeleteTagDialog() {
+        AlertDialog.Builder deleteDialogBuilder;
+        AlertDialog deleteDialog;
+
+        deleteDialogBuilder = new AlertDialog.Builder(this);
+        final View deleteTagView = getLayoutInflater().inflate(R.layout.delete_tag_dialog, null);
+
+        deleteDialogBuilder.setView(deleteTagView);
+        deleteDialog = deleteDialogBuilder.create();
+        deleteDialog.show();
+
+        Spinner note_tag = (Spinner) deleteTagView.findViewById(R.id.note_tag);
+        Button delete = (Button) deleteTagView.findViewById(R.id.btn_delete);
+        setUpSpinner(note_tag);
+
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (NoteModel item : listNote) {
+                    if (item.getNoteTag().equals(currentDeleteTag)) {
+                        Toast.makeText(ListNote.this, "Tag contain notes, delete notes first!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+
+                //find tag
+                int pos_to_del;
+                for (pos_to_del=0; pos_to_del<listTag.size(); pos_to_del++) {
+                    if (listTag.get(pos_to_del).getName().equals(currentDeleteTag))
+                        break;
+                }
+                //delete tag
+                listTag.remove(pos_to_del);
+
+                //save tag
+                saveTag(TAG, gson.toJson(listTag));
+                Toast.makeText(ListNote.this, "Tag deleted", Toast.LENGTH_SHORT).show();
+                deleteDialog.cancel();
+
+                //refresh activity
+                finish();
+                startActivity(getIntent());
+            }
+        });
+    }
+
     private void saveTag(String key, String value) {
         editor.putString(key, value);
         editor.commit();
@@ -265,5 +410,32 @@ public class ListNote extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         saveTag(TAG, gson.toJson(listTag));
+    }
+
+
+    private Spinner setUpSpinner(Spinner note_tag) {
+        List<String> list_tag = new ArrayList<>();
+
+        for (TagModel item : listTag) {
+            list_tag.add(item.getName());
+        }
+
+        currentDeleteTag = list_tag.get(0);
+        ArrayAdapter<String> adp = new ArrayAdapter<String>(this, R.layout.spinner_item, list_tag);
+        note_tag.setAdapter(adp);
+
+        note_tag.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                currentDeleteTag = list_tag.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                return;
+            }
+        });
+
+        return note_tag;
     }
 }

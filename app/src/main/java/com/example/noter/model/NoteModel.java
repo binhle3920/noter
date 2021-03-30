@@ -19,4 +19,6 @@ public class NoteModel implements Serializable {
     public String getNoteDate() {return note_date;}
     public String getNoteTag() {return tag;}
     public String getNoteContent() {return note_content;}
+
+    public void editNoteTag(String tag) {this.tag = tag;}
 }
