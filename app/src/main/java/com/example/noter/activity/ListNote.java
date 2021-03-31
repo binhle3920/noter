@@ -45,6 +45,8 @@ import java.util.List;
 
 import petrov.kristiyan.colorpicker.ColorPicker;
 
+import static android.widget.Toast.LENGTH_SHORT;
+
 public class ListNote extends AppCompatActivity {
     ImageButton add_note;
     List<TagModel> listTag;
@@ -90,6 +92,11 @@ public class ListNote extends AppCompatActivity {
         add_note.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (listTag.isEmpty()) {
+                    Toast.makeText(ListNote.this, "Create a tag First", LENGTH_SHORT).show();
+                    return;
+                }
+
                 Intent intent = new Intent(ListNote.this, DetailNote.class);
                 intent.putExtra("Mode", "New");
                 intent.putExtra("ListTag", (Serializable) listTag);
@@ -266,7 +273,7 @@ public class ListNote extends AppCompatActivity {
                 if (listTag != null) {
                     for (TagModel tag : listTag) {
                         if (tag_name_string.equals(tag.getName())) {
-                            Toast.makeText(ListNote.this, "Tag name existed! Choose another one.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ListNote.this, "Tag name existed! Choose another one.", LENGTH_SHORT).show();
                             return;
                         }
                     }
@@ -292,7 +299,7 @@ public class ListNote extends AppCompatActivity {
                 saveTag(TAG, gson.toJson(listTag));
                 saveTag(NOTE, gson.toJson(listNote));
 
-                Toast.makeText(ListNote.this, "Tag edited", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ListNote.this, "Tag edited", LENGTH_SHORT).show();
                 editDialog.cancel();
 
                 //refresh activity
@@ -347,7 +354,7 @@ public class ListNote extends AppCompatActivity {
                 if (listTag != null) {
                     for (TagModel tag : listTag) {
                         if (tag_name_string.equals(tag.getName())) {
-                            Toast.makeText(ListNote.this, "Tag name existed! Choose another one.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ListNote.this, "Tag name existed! Choose another one.", LENGTH_SHORT).show();
                             addDialog.cancel();
                             return;
                         }
@@ -361,7 +368,7 @@ public class ListNote extends AppCompatActivity {
                 tag.setTagModel(tag_name_string, current_color);
                 listTag.add(tag);
                 saveTag(TAG, gson.toJson(listTag));
-                Toast.makeText(ListNote.this, "Tag added", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ListNote.this, "Tag added", LENGTH_SHORT).show();
                 addDialog.cancel();
 
                 //refresh activity
@@ -391,7 +398,7 @@ public class ListNote extends AppCompatActivity {
             public void onClick(View v) {
                 for (NoteModel item : listNote) {
                     if (item.getNoteTag().equals(currentDeleteTag)) {
-                        Toast.makeText(ListNote.this, "Tag contain notes, delete notes first!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ListNote.this, "Tag contain notes, delete notes first!", LENGTH_SHORT).show();
                         return;
                     }
                 }
@@ -407,7 +414,7 @@ public class ListNote extends AppCompatActivity {
 
                 //save tag
                 saveTag(TAG, gson.toJson(listTag));
-                Toast.makeText(ListNote.this, "Tag deleted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ListNote.this, "Tag deleted", LENGTH_SHORT).show();
                 deleteDialog.cancel();
 
                 //refresh activity
