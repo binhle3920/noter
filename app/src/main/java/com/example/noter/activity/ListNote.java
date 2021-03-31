@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -69,7 +70,6 @@ public class ListNote extends AppCompatActivity {
         setUpResources();
 
         //set tag adapter
-
         if (listTag.isEmpty()) {
             recyclerViewTag.setVisibility(View.GONE);
             emptyLayout = (LinearLayout) findViewById(R.id.empty_layout);
@@ -148,7 +148,24 @@ public class ListNote extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return false;
+                Intent intent = new Intent(ListNote.this, SearchResult.class);
+                intent.putExtra("ListTag", (Serializable) listTag);
+                intent.putExtra("ListNote", (Serializable) listNote);
+                List<NoteModel> result = search(query);
+                intent.putExtra("SearchResult", (Serializable) result);
+                startActivity(intent);
+                return true;
+            }
+
+            private List<NoteModel> search(String query) {
+                List<NoteModel> result = new ArrayList<>();
+
+                for (NoteModel item : listNote) {
+                    if (item.getNoteTitle().contains(query))
+                        result.add(item);
+                }
+
+                return result;
             }
 
             @Override
@@ -285,7 +302,6 @@ public class ListNote extends AppCompatActivity {
         });
     }
 
-
     public void createAddTagDialog() {
         AlertDialog.Builder addDialogBuilder;
         AlertDialog addDialog;
@@ -411,7 +427,6 @@ public class ListNote extends AppCompatActivity {
         super.onDestroy();
         saveTag(TAG, gson.toJson(listTag));
     }
-
 
     private Spinner setUpSpinner(Spinner note_tag) {
         List<String> list_tag = new ArrayList<>();

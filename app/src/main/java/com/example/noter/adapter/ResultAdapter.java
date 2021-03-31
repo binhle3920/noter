@@ -1,13 +1,7 @@
 package com.example.noter.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,32 +9,26 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.noter.R;
 import com.example.noter.activity.DetailNote;
-import com.example.noter.activity.ListNote;
 import com.example.noter.model.NoteModel;
 import com.example.noter.model.TagModel;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class NoteAdapter extends RecyclerView.Adapter {
-    List<NoteModel> items, allItems;
-    List<TagModel> allTags;
-    TagModel tag;
+public class ResultAdapter extends RecyclerView.Adapter {
+    List<NoteModel> listNote, listResult;
+    List<TagModel> listTag;
     Context context;
 
-    public NoteAdapter(@NonNull Context context, int resource, List<NoteModel> items, TagModel tag, List<NoteModel> allItems, List<TagModel> allTags) {
-        this.items = items;
-        this.tag = tag;
+    public ResultAdapter(@NonNull Context context, int resource, List<NoteModel> listResult, List<NoteModel> listNote, List<TagModel> listTag) {
+        this.listNote = listNote;
+        this.listTag = listTag;
+        this.listResult = listResult;
         this.context = context;
-        //we need those variable for opening adding activiy
-        this.allItems = allItems;
-        this.allTags = allTags;
     }
 
     //item holder class
@@ -59,10 +47,10 @@ public class NoteAdapter extends RecyclerView.Adapter {
         public void onClick(View v) {
             Intent intent = new Intent(context, DetailNote.class);
             intent.putExtra("Mode", "Edit");
-            intent.putExtra("ListTag", (Serializable) allTags);
-            intent.putExtra("ListNote", (Serializable) allItems);
+            intent.putExtra("ListTag", (Serializable) listTag);
+            intent.putExtra("ListNote", (Serializable) listNote);
 
-            for (NoteModel note : items) {
+            for (NoteModel note : listResult) {
                 if (note.getNoteTitle().equals(String.valueOf(btn.getText()))) {
                     intent.putExtra("Note", (Serializable) note);
                 }
@@ -78,22 +66,28 @@ public class NoteAdapter extends RecyclerView.Adapter {
         return new NoteItemHolder(item);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        NoteModel item = items.get(position);
+        NoteModel note = listResult.get(position);
         NoteItemHolder noteItemHolder = (NoteItemHolder) holder;
-        //enable long lick
-        noteItemHolder.itemView.setLongClickable(true);
-        //set background and text
-        noteItemHolder.btn.setBackgroundColor(tag.getColor());
-        noteItemHolder.btn.setText(item.getNoteTitle());
-        noteItemHolder.date.setText(item.getNoteDate());
-    }
 
+        //find tag of this note
+        int color = listTag.get(0).getColor();
+        for (TagModel item : listTag) {
+            if (item.getName().equals(note.getNoteTag())) {
+                color = item.getColor();
+                break;
+            }
+        }
+
+        //set background and text
+        noteItemHolder.btn.setBackgroundColor(color);
+        noteItemHolder.btn.setText(note.getNoteTitle());
+        noteItemHolder.date.setText(note.getNoteDate());
+    }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return listResult.size();
     }
 }
