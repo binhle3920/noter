@@ -101,7 +101,6 @@ public class ListNote extends AppCompatActivity {
                 intent.putExtra("Mode", "New");
                 intent.putExtra("ListTag", (Serializable) listTag);
                 intent.putExtra("ListNote", (Serializable) listNote);
-                finish();
                 startActivity(intent);
             }
         });
@@ -435,6 +434,12 @@ public class ListNote extends AppCompatActivity {
         saveTag(TAG, gson.toJson(listTag));
     }
 
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        finish();
+        startActivity(getIntent());
+    }
     private Spinner setUpSpinner(Spinner note_tag) {
         List<String> list_tag = new ArrayList<>();
 
